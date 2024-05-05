@@ -1,6 +1,5 @@
 package net.originmobi.pdv.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
@@ -13,6 +12,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import net.originmobi.pdv.model.Categoria;
 import net.originmobi.pdv.service.CategoriaService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 @Controller
 @RequestMapping("/categoria")
@@ -22,8 +24,13 @@ public class CategoriaController {
 
 	private static final String CATEGORIA_FORM = "categoria/form";
 
-	@Autowired
+	private static final Logger logger = LoggerFactory.getLogger(CategoriaController.class);
+
 	private CategoriaService categorias;
+
+	public CategoriaController(CategoriaService categorias) {
+        this.categorias = categorias;
+    }
 
 	@GetMapping
 	public ModelAndView lista() {
@@ -55,7 +62,8 @@ public class CategoriaController {
 			categorias.cadastrar(categoria);
 			attributes.addFlashAttribute("mensagem", "Categoria salva com sucesso");
 		} catch (Exception e) {
-			System.out.println("Erro ao cadastrar Categoria " + e);
+			logger.error("Erro ao cadastrar Categoria ",e);
+
 		}
 		return "redirect:/categoria/form";
 	}

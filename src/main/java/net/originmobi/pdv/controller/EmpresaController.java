@@ -3,7 +3,6 @@ package net.originmobi.pdv.controller;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -23,17 +22,18 @@ public class EmpresaController {
 
 	private static final String EMPRESA_FORM = "empresa/form";
 
-	@Autowired
 	private EmpresaService empresas;
-
-	@Autowired
 	private RegimeTributarioService regimesTributarios;
-
-	@Autowired
 	private CidadeService cidades;
-
-	@Autowired
 	private TipoAmbienteServer ambientes;
+
+	public EmpresaController(EmpresaService empresas, RegimeTributarioService regimesTributarios,
+	CidadeService cidades, TipoAmbienteServer ambientes) {
+		this.empresas = empresas;
+		this.regimesTributarios = regimesTributarios;
+	this.cidades = cidades;
+	this.ambientes = ambientes;
+	}
 
 	@GetMapping
 	public ModelAndView form() {
@@ -46,7 +46,7 @@ public class EmpresaController {
 	public String cadastra(@RequestParam Map<String, String> request, RedirectAttributes attributes) {
 		String strCodigo = request.get("codigo");
 		String nome = request.get("nome");
-		String nome_fantasia = request.get("nome_fantasia");
+		String nomeFantasia = request.get("nomeFantasia");
 		String cnpj = request.get("cnpj");
 		String ie = request.get("ie");
 		String vlSerie = request.get("parametro.serie_nfe");
@@ -62,13 +62,14 @@ public class EmpresaController {
 		String tipoAmbiente = request.get("parametro.ambiente");
 		String aliqCred = request.get("parametro.pCredSN").replace(",", ".");
 
-		int ambiente = tipoAmbiente.isEmpty() ? null : Integer.parseInt(tipoAmbiente);
+		int ambiente = 0; // Valor padrão, caso tipoAmbiente seja nulo ou vazio
+		if (tipoAmbiente != null && !tipoAmbiente.isEmpty()) {ambiente = Integer.parseInt(tipoAmbiente);}
 		int serie = vlSerie.isEmpty() ? 0 : Integer.parseInt(vlSerie);
 		Long codigo = strCodigo.isEmpty() ? null : Long.decode(strCodigo);
 		Long codendereco = strCodEnde.isEmpty() ? null : Long.decode(strCodEnde);
 		Double aliqCalcCredito = aliqCred.isEmpty() ? 0.0 : Double.valueOf(aliqCred); 
 
-		String mensagem = empresas.merger(codigo, nome, nome_fantasia, cnpj, ie, serie, ambiente, codRegime, codendereco,
+		String mensagem = empresas.merger(codigo, nome, nomeFantasia, cnpj, ie, serie, ambiente, codRegime, codendereco,
 				codcidade, rua, bairro, numero, cep, referencia, aliqCalcCredito);
 		attributes.addFlashAttribute("mensagem", mensagem);
 

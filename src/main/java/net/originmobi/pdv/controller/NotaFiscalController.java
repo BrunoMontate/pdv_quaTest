@@ -6,7 +6,6 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.UriComponents;
@@ -22,8 +21,10 @@ import net.originmobi.pdv.service.ProdutoService;
 import net.originmobi.pdv.service.notafiscal.FreteTipoService;
 import net.originmobi.pdv.service.notafiscal.NotaFiscalItemService;
 import net.originmobi.pdv.service.notafiscal.NotaFiscalService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Controller
+@RestController
 @RequestMapping("/notafiscal")
 public class NotaFiscalController {
 
@@ -31,20 +32,22 @@ public class NotaFiscalController {
 
 	private static final String NOTAFISCAL_FORM = "notafiscal/form";
 
-	@Autowired
-	private NotaFiscalService notasFiscais;
+	private static final Logger logger = LoggerFactory.getLogger(NotaFiscalController.class);
+
+	private final NotaFiscalService notasFiscais;
+	private final PessoaService pessoas;
+	private final ProdutoService produtos;
+	private final NotaFiscalItemService itens;
+	private final FreteTipoService fretes;
 
 	@Autowired
-	private PessoaService pessoas;
-	
-	@Autowired
-	private ProdutoService produtos;
-	
-	@Autowired
-	private NotaFiscalItemService itens;
-	
-	@Autowired
-	private FreteTipoService fretes;
+	public NotaFiscalController(NotaFiscalService notasFiscais,PessoaService pessoas,ProdutoService produtos,NotaFiscalItemService itens,FreteTipoService fretes){
+		this.notasFiscais = notasFiscais;
+		this.pessoas = pessoas;
+		this.produtos = produtos;
+		this.itens = itens;
+		this.fretes = fretes;
+	}
 
 	@GetMapping("/form")
 	public ModelAndView form() {
@@ -54,17 +57,17 @@ public class NotaFiscalController {
 	}
 
 	@PostMapping
-	public @ResponseBody String criaNota(@RequestParam Map<String, String> request, UriComponentsBuilder b) {
+	public String criaNota(@RequestParam Map<String, String> request, UriComponentsBuilder b) {
 		UriComponents uri = b.path("/notafiscal/").build();
 		HttpHeaders headers = new HttpHeaders();
 		headers.setLocation(uri.toUri());
 		
 		
 		if(request.get("natureza_operacao").isEmpty())
-			throw new RuntimeException("Favor, informe a natureza da operação");
+			throw new IllegalArgumentException("Favor, informe a natureza da operação");
 		
 		if(request.get("destinatario").isEmpty())
-			throw new RuntimeException("Favor, informe o destinatário");
+			throw new IllegalArgumentException("Favor, informe o destinatário");
 		
 		
 		Long coddesti = Long.decode(request.get("destinatario"));
@@ -88,7 +91,7 @@ public class NotaFiscalController {
 	}
 	
 	@PostMapping("{codigo}")
-	public @ResponseBody String emitir(@PathVariable("codigo") NotaFiscal notaFiscal) {
+	public String emitir(@PathVariable("codigo") NotaFiscal notaFiscal) {
 		
 		notasFiscais.emitir(notaFiscal);
 		
@@ -97,7 +100,8 @@ public class NotaFiscalController {
 	
 	@GetMapping
 	public ModelAndView lista() {
-		System.out.println("veio aqui");
+		logger.error("veio aqui");
+
 		ModelAndView mv = new ModelAndView(NOTAFISCAL_LIST);
 		mv.addObject("notas", notasFiscais.lista());
 		return mv;

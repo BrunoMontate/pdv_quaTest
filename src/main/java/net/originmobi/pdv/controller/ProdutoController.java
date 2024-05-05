@@ -7,7 +7,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
@@ -35,6 +34,8 @@ import net.originmobi.pdv.service.ImagemProdutoService;
 import net.originmobi.pdv.service.ProdutoService;
 import net.originmobi.pdv.service.TributacaoService;
 import net.originmobi.pdv.service.notafiscal.ModBcIcmsService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Controller
 @RequestMapping("/produto")
@@ -45,26 +46,25 @@ public class ProdutoController {
 
 	private static final String PRODUTO_FORM = "produto/form";
 
-	@Autowired
+	private static final Logger logger = LoggerFactory.getLogger(ProdutoController.class);
+
 	private ProdutoService produtos;
-
-	@Autowired
-	private FornecedorService fornecedores;
-
-	@Autowired
 	private GrupoService grupos;
-
-	@Autowired
 	private CategoriaService categorias;
-
-	@Autowired
+	private FornecedorService fornecedores;
 	private ImagemProdutoService imagens;
-
-	@Autowired
 	private TributacaoService tributacoes;
-
-	@Autowired
 	private ModBcIcmsService modbcs;
+
+	public ProdutoController(ProdutoService produtos,GrupoService grupos,CategoriaService categorias,ImagemProdutoService imagens,TributacaoService tributacoes,ModBcIcmsService modbcs,FornecedorService fornecedores){
+		this.produtos = produtos;
+		this.grupos = grupos;
+		this.categorias = categorias;
+		this.imagens = imagens;
+		this.tributacoes = tributacoes;
+		this.modbcs = modbcs;
+		this.fornecedores = fornecedores;
+	}
 
 	@GetMapping("/form")
 	public ModelAndView form(Produto produto) {
@@ -138,7 +138,7 @@ public class ProdutoController {
 				: ProdutoSubstTributaria.NAO;
 
 		String mensagem = "";
-		System.out.println(controleEstoque);
+		logger.info(controleEstoque);
 		mensagem = produtos.merger(codigoprod, codforne, categoria, grupo, usaBalanca, descricao, valorCusto,
 				valorVenda, dataValidade, controleEstoque, situacao.toString(), unitario, substituicao, ncm, cest, tributacao,
 				modbc, vendavel);

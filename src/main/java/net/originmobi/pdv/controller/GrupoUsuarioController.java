@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +15,7 @@ import net.originmobi.pdv.model.Permissoes;
 import net.originmobi.pdv.service.GrupoUsuarioService;
 import net.originmobi.pdv.service.PermissoesService;
 
-@Controller
+@RestController
 @RequestMapping("/grupousuario")
 public class GrupoUsuarioController {
 
@@ -24,11 +23,14 @@ public class GrupoUsuarioController {
 
 	private static final String GRUPOUSUARIO_LIST = "grupousuario/list";
 
-	@Autowired
 	private GrupoUsuarioService gruposUsuarios;
-
-	@Autowired
 	private PermissoesService permissoes;
+
+	@Autowired 
+	public GrupoUsuarioController(GrupoUsuarioService gruposUsuarios,PermissoesService permissoes) {
+		this.gruposUsuarios = gruposUsuarios;
+		this.permissoes = permissoes;
+	}
 
 	@GetMapping
 	public ModelAndView lista() {
@@ -65,12 +67,11 @@ public class GrupoUsuarioController {
 	@GetMapping("/remove/{codigo}")
 	public String remover(@PathVariable Long codigo, RedirectAttributes attributes) {
 
-		// attributes.addFlashAttribute();
 		return gruposUsuarios.remove(codigo, attributes);
 	}
 	
 	@PostMapping("/addpermissao")
-	public @ResponseBody String addPermissao(@RequestParam Map<String, String> request) {
+	public String addPermissao(@RequestParam Map<String, String> request) {
 		Long codgrupo = Long.decode(request.get("grupo"));
 		Long codpermissao = Long.decode(request.get("permissao"));
 		
@@ -78,7 +79,7 @@ public class GrupoUsuarioController {
 	}
 	
 	@DeleteMapping("/remove/")
-	public @ResponseBody String removePermissao(@RequestParam Map<String, String> request) {
+	public String removePermissao(@RequestParam Map<String, String> request) {
 		Long codigo = Long.decode(request.get("codigo"));
 		Long codgrupo = Long.decode(request.get("codgrupo"));
 		

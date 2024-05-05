@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.originmobi.pdv.model.Grupo;
 import net.originmobi.pdv.service.GrupoService;
@@ -20,8 +22,13 @@ public class GrupoController {
 
 	private static final String GRUPO_LIST = "grupo/list";
 	private static final String GRUPO_FORM = "grupo/form";
+	private static final Logger logger = LoggerFactory.getLogger(GrupoController.class);
+	private final GrupoService grupos;
+
 	@Autowired
-	private GrupoService grupos;
+	public GrupoController(GrupoService grupos){
+		this.grupos = grupos;
+	}
 
 	@GetMapping("/form")
 	public ModelAndView form() {
@@ -53,7 +60,7 @@ public class GrupoController {
 			grupos.cadastrar(grupo);
 			attributes.addFlashAttribute("mensagem", "Grupo salvo com sucesso");
 		} catch (Exception e) {
-			System.out.println("Erro ao cadastrar Grupo " + e);
+			logger.error("Erro ao cadastrar Grupo ",e);
 		}
 
 		return "redirect:/grupo/form";

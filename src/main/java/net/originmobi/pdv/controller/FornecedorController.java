@@ -26,6 +26,9 @@ import net.originmobi.pdv.service.CidadeService;
 import net.originmobi.pdv.service.EnderecoService;
 import net.originmobi.pdv.service.FornecedorService;
 import net.originmobi.pdv.service.TelefoneService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 @Controller
 @RequestMapping("/fornecedor")
@@ -33,18 +36,22 @@ public class FornecedorController {
 
 	private static final String FORNECEDOR_FORM = "fornecedor/form";
 	private static final String FORNECEDOR_LIST = "fornecedor/list";
+	private static final Logger logger = LoggerFactory.getLogger(FornecedorController.class);
+	private static final String REDIRECT_FORNECEDOR_FORM = "redirect:/fornecedor/form";
+
+
+	private final FornecedorService fornecedores;
+	private final CidadeService cidades;
+	private final EnderecoService enderecos;
+	private final TelefoneService telefones;
 
 	@Autowired
-	private FornecedorService fornecedores;
-
-	@Autowired
-	private CidadeService cidades;
-
-	@Autowired
-	private EnderecoService enderecos;
-
-	@Autowired
-	private TelefoneService telefones;
+    public FornecedorController(FornecedorService fornecedores, CidadeService cidades, EnderecoService enderecos, TelefoneService telefones) {
+        this.fornecedores = fornecedores;
+        this.cidades = cidades;
+        this.enderecos = enderecos;
+        this.telefones = telefones;
+    }
 
 	@GetMapping("/form")
 	public ModelAndView form() {
@@ -87,15 +94,15 @@ public class FornecedorController {
 		try {
 			enderecos.cadastrar(endereco);
 		} catch (Exception e) {
-			System.out.println("Erro ao cadastrar endereço " + e);
-			return "redirect:/fornecedor/form";
+			logger.error("Erro ao cadastrar endereço ",e);
+			return REDIRECT_FORNECEDOR_FORM;
 		}
 
 		try {
 			telefones.cadastrar(telefone);
 		} catch (Exception e) {
-			System.out.println("Erro ao cadastrar telefone " + e);
-			return "redirect:/fornecedor/form";
+			logger.error("Erro ao cadastrar telefone ",e);
+			return REDIRECT_FORNECEDOR_FORM;
 		}
 
 		fornecedor.setEndereco(endereco);
@@ -105,12 +112,12 @@ public class FornecedorController {
 			String mensagem = fornecedores.cadastrar(fornecedor);
 			attributes.addFlashAttribute("mensagem", mensagem);
 
-			return "redirect:/fornecedor/form";
+			return REDIRECT_FORNECEDOR_FORM;
 		} catch (Exception e) {
-			System.out.println("Erro ao cadastrar fornecedor " + e);
+			logger.error("Erro ao cadastrar fornecedor ",e);
 		}
 
-		return "redirect:/fornecedor/form";
+		return REDIRECT_FORNECEDOR_FORM;
 	}
 
 	@ModelAttribute("cidades")

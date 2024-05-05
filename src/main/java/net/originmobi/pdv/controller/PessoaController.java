@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -23,24 +22,25 @@ import net.originmobi.pdv.service.EnderecoService;
 import net.originmobi.pdv.service.PessoaService;
 import net.originmobi.pdv.service.TelefoneService;
 
-@Controller
+@RestController
 @RequestMapping("/pessoa")
 public class PessoaController {
 
 	private static final String PESSOA_LISTA = "pessoa/list";
 	private static final String PESSOA_FORM = "pessoa/form";
 
+	private final PessoaService pessoas;
+	private final CidadeService cidades;
+	private final EnderecoService enderecos;
+	private final TelefoneService telefones;
+	
 	@Autowired
-	private PessoaService pessoas;
-
-	@Autowired
-	private CidadeService cidades;
-
-	@Autowired
-	private EnderecoService enderecos;
-
-	@Autowired
-	private TelefoneService telefones;
+	public PessoaController(PessoaService pessoas,CidadeService cidades,EnderecoService enderecos,TelefoneService telefones){
+		this.pessoas = pessoas;
+		this.cidades = cidades;
+		this.enderecos = enderecos;
+		this.telefones = telefones;
+	}
 
 	@GetMapping("/form")
 	public ModelAndView form() {
@@ -59,13 +59,13 @@ public class PessoaController {
 	}
 
 	@PostMapping
-	public @ResponseBody String cadastrar(@RequestParam Map<String, String> request, RedirectAttributes attributes) throws ParseException {
+	public String cadastrar(@RequestParam Map<String, String> request, RedirectAttributes attributes) throws ParseException {
 		// Pessoa
 		String stCodPessoa = request.get("codigo") != null ? request.get("codigo") : "";
 		String nome = request.get("nome");
 		String apelido = request.get("apelido");
 		String cpfcnpj = request.get("cpfcnpj").replaceAll("\\D", "");
-		String data_nascimento = request.get("data_nascimento");
+		String dataNascimento = request.get("dataNascimento");
 		String observacao = request.get("observacao");
 		
 		// Endereço
@@ -86,7 +86,7 @@ public class PessoaController {
 		Long codendereco = stCodEndereco.isEmpty() ? 0L : Long.decode(stCodEndereco);
 		Long codfone = stCodFone.isEmpty() ? 0L : Long.decode(stCodFone);
 
-		return pessoas.cadastrar(codpessoa, nome, apelido, cpfcnpj, data_nascimento, observacao, codendereco, codcidade, rua,
+		return pessoas.cadastrar(codpessoa, nome, apelido, cpfcnpj, dataNascimento, observacao, codendereco, codcidade, rua,
 				bairro, numero, cep, referencia, codfone, fone, tipo, attributes);
 	}
 
@@ -100,7 +100,7 @@ public class PessoaController {
 	}
 
 	@PutMapping("/{codigo}")
-	public @ResponseBody Pessoa busca(@PathVariable Long codigo) {
+	public Pessoa busca(@PathVariable Long codigo) {
 		return pessoas.busca(codigo);
 	}
 
