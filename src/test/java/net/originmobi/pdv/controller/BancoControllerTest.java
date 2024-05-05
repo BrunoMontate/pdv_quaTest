@@ -13,7 +13,7 @@ import java.util.Collections;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class) // Adiciona a extensão Mockito para JUnit 5
+@ExtendWith(MockitoExtension.class)
 class BancoControllerTest {
 
     @Mock
@@ -24,15 +24,10 @@ class BancoControllerTest {
 
     @Test
     void testListar() {
-        // Mock data
         BancoFilter filter = new BancoFilter();
         when(caixaService.listaBancosAbertosTipoFilterBanco(CaixaTipo.BANCO, filter))
             .thenReturn(Collections.emptyList());
-
-        // Call the method
         ModelAndView modelAndView = bancoController.listar(filter);
-
-        // Verify interactions and assertions
         verify(caixaService, times(1)).listaBancosAbertosTipoFilterBanco(CaixaTipo.BANCO, filter);
         assertEquals("banco/list", modelAndView.getViewName());
         assertNotNull(modelAndView.getModel().get("bancos"));
